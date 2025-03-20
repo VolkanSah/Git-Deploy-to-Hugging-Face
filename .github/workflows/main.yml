@@ -2,32 +2,44 @@ name: Deploy to Hugging Face
 
 on:
   release:
-    types: [created]
+    types: [created]  # Trigger the workflow when a new release is created
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Run the job on the latest Ubuntu environment
     steps:
-      - name: Repository auschecken
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3  # Get the repository content
 
-      - name: Git-Konfiguration einrichten
+      - name: Configure Git
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-      - name: Hugging Face Remote hinzufügen und pushen
+      - name: Authenticate and Push to Hugging Face
         env:
-          HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}  # Dein Hugging Face API Token
+          HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}  # Access the Hugging Face API token securely
         run: |
-          # For Model-Repository:
-          # git remote add hf https://${HF_API_TOKEN}@huggingface.co/models/<username>/<repo>
-          # git push hf HEAD:main  # Oder passe den Branch-Namen an
+          # Store authentication credentials for Git
+          git config --global credential.helper store
+          echo "https://${HF_API_TOKEN}:x-oauth-basic@huggingface.co" > ~/.git-credentials
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
 
-          # For Dataset-Repository 
-          # git remote add hf https://${HF_API_TOKEN}@huggingface.co/datasets/<username>/<repo>
+          # Choose the correct repository type and uncomment the relevant section
+
+          # For Model Repository:
+          # git remote add hf https://huggingface.co/models/<username>/<repo>
+          # git push hf HEAD:main  # Adjust the branch name if needed
+
+          # For Dataset Repository:
+          # git remote add hf https://huggingface.co/datasets/<username>/<repo>
           # git push hf HEAD:main
 
-          # For Spaces 
-           git remote add hf https://${HF_API_TOKEN}@huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face
-           git push hf HEAD:main
+          # For Spaces Repository (Default, change username/repo as needed):
+          git remote add hf https://huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face
+          git push hf HEAD:main  # Adjust the branch name if needed
+
+      # Optional: Add a post-deployment success message
+      - name: Deployment Success
+        run: echo "Deployment to Hugging Face was successful! 🚀"
