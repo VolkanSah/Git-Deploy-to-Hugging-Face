@@ -11,27 +11,25 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3  # Get the repository content
 
-      - name: Configure Git
+      - name: Configure Git and Create .netrc
+        env:
+          HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}  # Your Hugging Face API token
         run: |
+          # Configure Git user details
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          
+          # Create a .netrc file for Git authentication with Hugging Face
+          # Replace 'Alibrown' with your actual Hugging Face username if different
+          echo -e "machine huggingface.co\nlogin Alibrown\npassword ${HF_API_TOKEN}" > ~/.netrc
+          chmod 600 ~/.netrc  # Secure the file permissions
 
-      - name: Authenticate and Push to Hugging Face
-        env:
-          HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}  # Access the Hugging Face API token securely
+      - name: Push to Hugging Face Spaces
         run: |
-          # Use the Hugging Face API token for authentication
-          git remote add hf https://user:${HF_API_TOKEN}@huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face
-          git push hf HEAD:main  # Adjust the branch name if needed
+          # Add the remote for Hugging Face Spaces (adjust username/repo as needed)
+          git remote add hf https://huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face
+          # Push the current branch to Hugging Face (adjust branch if necessary)
+          git push hf HEAD:main
 
-          # For Model Repository:
-          # git remote add hf https://user:${HF_API_TOKEN}@huggingface.co/models/<username>/<repo>
-          # git push hf HEAD:main  # Adjust the branch name if needed
-
-          # For Dataset Repository:
-          # git remote add hf https://user:${HF_API_TOKEN}@huggingface.co/datasets/<username>/<repo>
-          # git push hf HEAD:main
-
-      # Optional: Add a post-deployment success message
       - name: Deployment Success
         run: echo "Deployment to Hugging Face was successful! 🚀"
