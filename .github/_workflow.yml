@@ -20,6 +20,14 @@ jobs:
         env:
           HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}  # Dein Hugging Face API Token
         run: |
-          # Ersetze <username> und <repo> mit deinen Hugging Face Angaben
-          git remote add hf https://${HF_API_TOKEN}@huggingface.co/<username>/<repo>
-          git push hf HEAD:main  # Oder passe den Branch-Namen an
+          # For Model-Repository:
+          # git remote add hf https://${HF_API_TOKEN}@huggingface.co/models/<username>/<repo>
+          # git push hf HEAD:main  # Oder passe den Branch-Namen an
+
+          # For Dataset-Repository 
+          # git remote add hf https://${HF_API_TOKEN}@huggingface.co/datasets/<username>/<repo>
+          # git push hf HEAD:main
+
+          # For Spaces 
+           git remote add hf https://${HF_API_TOKEN}@huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face
+           git push hf HEAD:main
