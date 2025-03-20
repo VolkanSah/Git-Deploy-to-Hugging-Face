@@ -6,30 +6,43 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Run the job on the latest Ubuntu environment
+    runs-on: ubuntu-latest  # Run on the latest Ubuntu environment
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3  # Get the repository content
+        uses: actions/checkout@v3  # Check out the repository
 
-      - name: Configure Git and Create .netrc
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Push to Hugging Face Spaces using Token in URL
         env:
           HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}  # Your Hugging Face API token
         run: |
-          # Configure Git user details
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          
-          # Create a .netrc file for Git authentication with Hugging Face
-          # Replace 'Alibrown' with your actual Hugging Face username if different
-          echo -e "machine huggingface.co\nlogin Alibrown\npassword ${HF_API_TOKEN}" > ~/.netrc
-          chmod 600 ~/.netrc  # Secure the file permissions
-
-      - name: Push to Hugging Face Spaces
-        run: |
-          # Add the remote for Hugging Face Spaces (adjust username/repo as needed)
-          git remote add hf https://huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face
-          # Push the current branch to Hugging Face (adjust branch if necessary)
+          # Add the remote with the token embedded in the URL (note the .git suffix)
+          git remote add hf https://Alibrown:${HF_API_TOKEN}@huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face.git
+          # Push the current branch to Hugging Face (adjust branch name if needed)
           git push hf HEAD:main
 
       - name: Deployment Success
         run: echo "Deployment to Hugging Face was successful! 🚀"
+        
+      # ------------------------------------------------------------------
+      # Uncomment the following sections if you want to deploy to other repository types:
+      
+      # For Model Repository:
+      # - name: Push to Hugging Face Model Repository
+      #   env:
+      #     HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
+      #   run: |
+      #     git remote add hf https://Alibrown:${HF_API_TOKEN}@huggingface.co/models/<username>/<repo>.git
+      #     git push hf HEAD:main
+
+      # For Dataset Repository:
+      # - name: Push to Hugging Face Dataset Repository
+      #   env:
+      #     HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
+      #   run: |
+      #     git remote add hf https://Alibrown:${HF_API_TOKEN}@huggingface.co/datasets/<username>/<repo>.git
+      #     git push hf HEAD:main
