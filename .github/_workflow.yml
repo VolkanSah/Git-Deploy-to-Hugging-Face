@@ -1,0 +1,25 @@
+name: Deploy to Hugging Face
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Git-Konfiguration einrichten
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Hugging Face Remote hinzufügen und pushen
+        env:
+          HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}  # Dein Hugging Face API Token
+        run: |
+          # Ersetze <username> und <repo> mit deinen Hugging Face Angaben
+          git remote add hf https://${HF_API_TOKEN}@huggingface.co/<username>/<repo>
+          git push hf HEAD:main  # Oder passe den Branch-Namen an
