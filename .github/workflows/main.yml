@@ -20,25 +20,17 @@ jobs:
         env:
           HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}  # Access the Hugging Face API token securely
         run: |
-          # Store authentication credentials for Git
-          git config --global credential.helper store
-          echo "https://${HF_API_TOKEN}:x-oauth-basic@huggingface.co" > ~/.git-credentials
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-
-          # Choose the correct repository type and uncomment the relevant section
+          # Use the Hugging Face API token for authentication
+          git remote add hf https://user:${HF_API_TOKEN}@huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face
+          git push hf HEAD:main  # Adjust the branch name if needed
 
           # For Model Repository:
-          # git remote add hf https://huggingface.co/models/<username>/<repo>
+          # git remote add hf https://user:${HF_API_TOKEN}@huggingface.co/models/<username>/<repo>
           # git push hf HEAD:main  # Adjust the branch name if needed
 
           # For Dataset Repository:
-          # git remote add hf https://huggingface.co/datasets/<username>/<repo>
+          # git remote add hf https://user:${HF_API_TOKEN}@huggingface.co/datasets/<username>/<repo>
           # git push hf HEAD:main
-
-          # For Spaces Repository (Default, change username/repo as needed):
-          git remote add hf https://huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face
-          git push hf HEAD:main  # Adjust the branch name if needed
 
       # Optional: Add a post-deployment success message
       - name: Deployment Success
