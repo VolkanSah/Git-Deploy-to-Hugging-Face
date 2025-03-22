@@ -1,9 +1,7 @@
 name: Secure HF Deployment
-
 on:
   release:
     types: [created]
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -12,7 +10,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
+      
       - name: Setup Git
         run: |
           git config --global user.name "GitHub Actions"
@@ -21,7 +19,7 @@ jobs:
           # Hugging Face spezifische Authentifizierung
           git config --global credential.helper store
           echo "https://hf_user:${{ secrets.HF_API_TOKEN }}@huggingface.co" > ~/.git-credentials
-
+      
       - name: Push to Hugging Face
         run: |
           git remote add hf https://huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face
@@ -32,7 +30,7 @@ jobs:
           # Token masking für Sicherheit
           sed -i "s/${{ secrets.HF_API_TOKEN }}/******/g" push.log
           cat push.log
-
+      
       - name: Verify Token Usage
         run: |
           if grep -q "Authentication failed" push.log; then
