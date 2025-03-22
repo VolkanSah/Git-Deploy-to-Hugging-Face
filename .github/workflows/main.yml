@@ -11,29 +11,32 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Setup Git
+      - name: Configure Git
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          
-          # Hugging Face spezifische Authentifizierung
-          git config --global credential.helper store
-          echo "https://hf_user:${{ secrets.HF_API_TOKEN }}@huggingface.co" > ~/.git-credentials
       
-      - name: Push to Hugging Face
+      - name: Setup Hugging Face CLI
         run: |
-          git remote add hf https://huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face
-          
-          # Force-Push mit automatischem Token-Handling
-          git push hf HEAD:main --force-with-lease 2>&1 | tee push.log
-          
-          # Token masking für Sicherheit
-          sed -i "s/${{ secrets.HF_API_TOKEN }}/******/g" push.log
-          cat push.log
+          pip install huggingface_hub
+          echo "${{ secrets.HF_API_TOKEN }}" > ~/.huggingface/token
       
-      - name: Verify Token Usage
+      - name: Clone and Push to Hugging Face
+        env:
+          HF_SPACE: spaces/Alibrown/Git-Deploy-to-Hugging-Face
         run: |
-          if grep -q "Authentication failed" push.log; then
-            echo "::error::Invalid HF Token! Check permissions and validity."
-            exit 1
-          fi
+          # Verwende die Hugging Face CLI zum Klonen
+          git lfs install
+          huggingface-cli repo clone $HF_SPACE --token "${{ secrets.HF_API_TOKEN }}" hf-repo
+          
+          # Kopiere deine Inhalte in das geklonte Repository
+          cp -r * hf-repo/ || true
+          
+          # Committe und pushe die Änderungen
+          cd hf-repo
+          git add .
+          git commit -m "Update from GitHub Release"
+          huggingface-cli upload $HF_SPACE --token "${{ secrets.HF_API_TOKEN }}" --create-pr
+          
+          # Alternativ, wenn du direktes Pushen bevorzugst (ohne PR):
+          # git push origin main
