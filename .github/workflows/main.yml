@@ -20,13 +20,15 @@ jobs:
           git config --global user.email "actions@github.com"
           
           # Create a .netrc file for Git authentication with Hugging Face
-         echo -e "machine huggingface.co\nlogin Alibrown\npassword ${HF_API_TOKEN}" > ~/.netrc          
-         chmod 600 ~/.netrc  # Secure the file permissions
+          echo -e "machine huggingface.co\nlogin Alibrown\npassword ${HF_API_TOKEN}" > ~/.netrc
+          chmod 600 ~/.netrc  # Secure the file permissions
 
       - name: Add Remote and Sync Changes
+        env:
+          HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}  # Your Hugging Face API token
         run: |
-          # Add the remote for Hugging Face Spaces (adjust username/repo if needed)
-          git remote add hf https://huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face.git
+          # Add the remote for Hugging Face Spaces with token authentication
+          git remote add hf https://Alibrown:${HF_API_TOKEN}@huggingface.co/spaces/Alibrown/Git-Deploy-to-Hugging-Face.git
           
           # Option 1: Pull remote changes to merge with local history before pushing
           git pull hf main --allow-unrelated-histories || true
